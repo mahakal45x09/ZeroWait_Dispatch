@@ -5,5 +5,5 @@ pandas
 scikit-learn
 xgboost
 joblib
-streamlit
+streamlit>=1.32.0
 requests
