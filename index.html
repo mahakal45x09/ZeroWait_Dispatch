@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Dispatch Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; padding: 20px; }
+        .card { box-shadow: 0 4px 8px rgba(0,0,0,0.1); border: none; }
+        .result-box { background-color: #e9ecef; padding: 20px; border-radius: 8px; font-size: 1.1em;}
+        .action-hold { color: #dc3545; font-weight: bold; font-size: 1.5em; }
+        .action-dispatch { color: #198754; font-weight: bold; font-size: 1.5em; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="text-center mb-4 text-primary">🍔 AI Delivery Dispatch Dashboard</h2>
+    
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card p-4">
+                <h4>Live Order Details</h4>
+                <hr>
+                <form id="orderForm">
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label>Cuisine Type</label>
+                            <select class="form-select" id="cuisine_type">
+                                <option value="Fast Food">Fast Food</option>
+                                <option value="North Indian">North Indian</option>
+                                <option value="South Indian">South Indian</option>
+                                <option value="Chinese">Chinese</option>
+                                <option value="Continental">Continental</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label>City</label>
+                            <input type="text" class="form-control" id="city" value="Ahmedabad">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col"><label>Items Count</label><input type="number" class="form-control" id="items_count" value="5"></div>
+                        <div class="col"><label>Complexity (1-5)</label><input type="number" class="form-control" id="order_complexity_score" value="3"></div>
+                        <div class="col"><label>Base Prep (Min)</label><input type="number" class="form-control" id="avg_base_prep_time_min" value="20.0"></div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col"><label>Kitchen Capacity</label><input type="number" class="form-control" id="kitchen_capacity" value="10"></div>
+                        <div class="col"><label>Current Active Orders</label><input type="number" class="form-control" id="current_active_orders" value="12"></div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col"><label>Rider Distance (km)</label><input type="number" step="0.1" class="form-control" id="rider_distance_to_rest_km" value="3.5"></div>
+                        <div class="col"><label>Rider Speed (km/h)</label><input type="number" class="form-control" id="rider_avg_speed_kmph" value="30.0"></div>
+                    </div>
+
+                    <input type="hidden" id="peak_hour_flag" value="1">
+                    <input type="hidden" id="order_hour" value="19">
+                    <input type="hidden" id="day_of_week" value="5">
+                    <input type="hidden" id="is_weekend" value="1">
+                    <input type="hidden" id="rush_multiplier" value="1.5">
+                    <input type="hidden" id="is_cloud_kitchen" value="0">
+                    <input type="hidden" id="rating" value="4.2">
+                    <input type="hidden" id="reliability_score" value="0.80">
+                    <input type="hidden" id="historical_accuracy_score" value="0.85">
+                    <input type="hidden" id="cancellation_bias" value="1.0">
+
+                    <button type="button" class="btn btn-primary w-100 mt-3" onclick="predictDispatch()">🚀 Calculate AI Dispatch Time</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="card p-4 h-100">
+                <h4>AI Decision Engine</h4>
+                <hr>
+                <div id="loading" style="display:none;" class="text-center text-muted mt-5">
+                    <h5>Loading AI Prediction...</h5>
+                </div>
+                
+                <div id="results" class="result-box mt-3" style="display:none;">
+                    <p><strong>Raw AI Prep Time:</strong> <span id="res_base"></span> min</p>
+                    <p><strong>Adjusted KPT:</strong> <span id="res_adjusted"></span> min</p>
+                    <p class="text-muted"><small><em>Applied Rules: <span id="res_rules"></span></em></small></p>
+                    <hr>
+                    <p><strong>Rider Travel Time:</strong> <span id="res_rider"></span> min</p>
+                    <div class="text-center mt-4">
+                        <p class="mb-1 text-muted">System Recommendation:</p>
+                        <p id="res_action" class=""></p>
+                        <h4 class="text-dark">Wait <span id="res_delay" class="text-primary fw-bold"></span> minutes to dispatch</h4>
+                    </div>
+                </div>
+                
+                <div id="error-box" class="alert alert-danger mt-3" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function predictDispatch() {
+        // 1. Hide old results and show loading text
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('error-box').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+
+        // 2. Gather data from the HTML form
+        const orderData = {
+            cuisine_type: document.getElementById('cuisine_type').value,
+            city: document.getElementById('city').value,
+            items_count: parseInt(document.getElementById('items_count').value),
+            order_complexity_score: parseInt(document.getElementById('order_complexity_score').value),
+            avg_base_prep_time_min: parseFloat(document.getElementById('avg_base_prep_time_min').value),
+            kitchen_capacity: parseInt(document.getElementById('kitchen_capacity').value),
+            current_active_orders: parseInt(document.getElementById('current_active_orders').value),
+            rider_distance_to_rest_km: parseFloat(document.getElementById('rider_distance_to_rest_km').value),
+            rider_avg_speed_kmph: parseFloat(document.getElementById('rider_avg_speed_kmph').value),
+            
+            // Hidden fields
+            peak_hour_flag: parseInt(document.getElementById('peak_hour_flag').value),
+            order_hour: parseInt(document.getElementById('order_hour').value),
+            day_of_week: parseInt(document.getElementById('day_of_week').value),
+            is_weekend: parseInt(document.getElementById('is_weekend').value),
+            rush_multiplier: parseFloat(document.getElementById('rush_multiplier').value),
+            is_cloud_kitchen: parseInt(document.getElementById('is_cloud_kitchen').value),
+            rating: parseFloat(document.getElementById('rating').value),
+            reliability_score: parseFloat(document.getElementById('reliability_score').value),
+            historical_accuracy_score: parseFloat(document.getElementById('historical_accuracy_score').value),
+            cancellation_bias: parseFloat(document.getElementById('cancellation_bias').value)
+        };
+
+        try {
+            // 3. Send data to your FastAPI Backend
+            const response = await fetch('http://127.0.0.1:8000/predict_dispatch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            // 4. Display the results on the dashboard
+            document.getElementById('res_base').innerText = data.base_predicted_kpt_min;
+            document.getElementById('res_adjusted').innerText = data.final_adjusted_kpt_min;
+            document.getElementById('res_rules').innerText = data.business_rules_applied.length > 0 ? data.business_rules_applied.join(", ") : "None";
+            document.getElementById('res_rider').innerText = data.rider_travel_time_min;
+            document.getElementById('res_delay').innerText = data.recommended_dispatch_delay_min;
+            
+            const actionEl = document.getElementById('res_action');
+            if(data.action === "HOLD") {
+                actionEl.innerText = "🛑 HOLD DISPATCH";
+                actionEl.className = "action-hold";
+            } else {
+                actionEl.innerText = "⚡ DISPATCH NOW";
+                actionEl.className = "action-dispatch";
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+
+        } catch (error) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-box').innerText = "Failed to connect to API. Is your Uvicorn server running?";
+            document.getElementById('error-box').style.display = 'block';
+            console.error(error);
+        }
+    }
+</script>
+</body>
+</html>
