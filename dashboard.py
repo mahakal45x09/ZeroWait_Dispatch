@@ -66,7 +66,7 @@ with col2:
         with st.spinner("Connecting to AI Model..."):
             try:
                 # Send the data to your FastAPI backend
-                response = requests.post('http://127.0.0.1:8000/predict_dispatch', json=order_data)
+                response = requests.post('https://zerowait-api-5xfg.onrender.com/predict_dispatch', json=order_data)
                 
                 if response.status_code == 200:
                     data = response.json()
