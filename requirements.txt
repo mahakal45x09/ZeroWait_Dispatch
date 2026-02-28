@@ -7,3 +7,4 @@ xgboost
 joblib
 streamlit>=1.32.0
 requests
+streamlit-lottie

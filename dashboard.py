@@ -1,9 +1,24 @@
 import streamlit as st
 import requests
+from streamlit_lottie import st_lottie  
+
+
+def load_lottieurl(url: str):
+    r = requests.get(url)
+    if r.status_code != 200:
+        return None
+    return r.json()
+
+# Load a cool AI data processing animation
+lottie_ai = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_1yy002na.json")
+# ---------------------------------------
 
 # 1. Page Configuration
 st.set_page_config(page_title="ZeroWait Dispatch", page_icon="images.jpeg", layout="wide")
 st.title("ZeroWait Dispatch Dashboard")
+st_lottie(lottie_ai, height=200, width=200)
+
+
 
 # 2. Setup the Two-Column Layout
 col1, col2 = st.columns([1.5, 1])
@@ -58,6 +73,10 @@ with col1:
 
 with col2:
     st.subheader("AI Decision Engine")
+    if lottie_ai:
+        st_lottie(lottie_ai, height=150, key="ai_processing")
+    
+
     
     # 3. What happens when the user clicks the button
     if submit_button:
