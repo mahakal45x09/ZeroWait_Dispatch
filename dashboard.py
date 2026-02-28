@@ -30,7 +30,7 @@ with col1:
         rider_distance_to_rest_km = row4_col1.number_input("Rider Distance (km)", min_value=0.1, value=3.5)
         rider_avg_speed_kmph = row4_col2.number_input("Rider Speed (km/h)", min_value=1.0, value=30.0)
         
-        
+        #  ZOMATO SIGNAL ENRICHMENT 
         st.markdown("---")
         st.markdown("#### 📡 Zomato Signal Enrichment")
         row5_col1, row5_col2 = st.columns(2)
@@ -42,8 +42,16 @@ with col1:
             index=1
         )
         used_iot_button = st.checkbox("🛎️ Merchant used 'ZeroTap' IoT Button", value=False)
+        
+        #  REAL WORLD CHAOS FACTORS
         st.markdown("---")
-    
+        st.markdown("#### 🌧️ Real-World Chaos Factors")
+        live_weather_condition = st.selectbox(
+            "Live Local Weather (API Simulation)", 
+            ["Clear", "Light Rain", "Heavy Rain / Waterlogging"],
+            help="Heavy rain slows down kitchen operations and rider transit."
+        ) 
+        st.markdown("---")
         
         # The submit button
         submit_button = st.form_submit_button(label="🚀 Calculate AI Dispatch Time", use_container_width=True)
@@ -68,6 +76,7 @@ with col2:
             "total_pos_kitchen_load": total_pos_kitchen_load,
             "merchant_bias_score": merchant_bias_score,
             "used_iot_button": used_iot_button,
+            "live_weather_condition": live_weather_condition, # moved this here where it belongs!
             
             # Hidden fields (hardcoded defaults)
             "peak_hour_flag": 1,
@@ -90,12 +99,10 @@ with col2:
                 if response.status_code == 200:
                     data = response.json()
                     
-                
                     st.write(f"**Raw AI Prep Time:** {data['base_predicted_kpt_min']} min")
                     st.write(f"**Adjusted KPT:** {data['final_adjusted_kpt_min']} min")
                     
-                
-                    if data['business_rules_applied']:
+                    if data.get('business_rules_applied'):
                         rules = "\n".join([f"- {rule}" for rule in data['business_rules_applied']])
                         st.info(f"**System Adjustments Applied:**\n{rules}")
                     
