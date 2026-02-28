@@ -11,12 +11,12 @@ def load_lottieurl(url: str):
 
 # Load a cool AI data processing animation
 lottie_url = "https://assets8.lottiefiles.com/packages/lf20_xrmpegx2.json"
-lottie_ai = load_lottieurl(lottie_url)
+lottie_animation = load_lottieurl(lottie_url)
 
 # 1. Page Configuration
 st.set_page_config(page_title="ZeroWait Dispatch", page_icon="images.jpeg", layout="wide")
 st.title("ZeroWait Dispatch Dashboard")
-st_lottie(lottie_ai, height=200, width=200)
+st_lottie(lottie_animation, height=200, width=200)
 
 
 
@@ -73,8 +73,8 @@ with col1:
 
 with col2:
     st.subheader("AI Decision Engine")
-    if lottie_ai is not None:
-        st_lottie(lottie_ai, height=200, key="scooter_anim")
+    if lottie_animation is not None:
+        st_lottie(lottie_animation, height=200, key="scooter_anim")
     else:
         st.info("🏍️ AI Dispatch Engine Ready")
 
