@@ -73,9 +73,10 @@ with col1:
 
 with col2:
     st.subheader("AI Decision Engine")
-    if lottie_ai:
-        st_lottie(lottie_ai, height=150, key="ai_processing")
-    
+    if lottie_ai is not None:
+        st_lottie(lottie_ai, height=200, key="scooter_anim")
+    else:
+        st.info("🏍️ AI Dispatch Engine Ready")
 
     
     # 3. What happens when the user clicks the button
