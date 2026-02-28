@@ -10,8 +10,8 @@ def load_lottieurl(url: str):
     return r.json()
 
 # Load a cool AI data processing animation
-lottie_ai = load_lottieurl("https://assets5.lottiefiles.com/packages/lf20_1yy002na.json")
-# ---------------------------------------
+lottie_url = "https://assets8.lottiefiles.com/packages/lf20_xrmpegx2.json"
+lottie_ai = load_lottieurl(lottie_url)
 
 # 1. Page Configuration
 st.set_page_config(page_title="ZeroWait Dispatch", page_icon="images.jpeg", layout="wide")
