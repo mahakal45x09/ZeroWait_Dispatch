@@ -16,7 +16,7 @@ lottie_animation = load_lottieurl(lottie_url)
 # 1. Page Configuration
 st.set_page_config(page_title="ZeroWait Dispatch", page_icon="images.jpeg", layout="wide")
 st.title("ZeroWait Dispatch Dashboard")
-st_lottie(lottie_animation, height=200, width=200)
+
 
 
 
