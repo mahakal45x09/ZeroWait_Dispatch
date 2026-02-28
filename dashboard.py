@@ -15,7 +15,7 @@ with col1:
     with st.form("order_form"):
         row1_col1, row1_col2 = st.columns(2)
         cuisine_type = row1_col1.selectbox("Cuisine Type", ["Fast Food", "North Indian", "South Indian", "Chinese", "Continental"])
-        city = row1_col2.selectbox("City", ["Ahmedabad",  "Vadodra", "Rajkot", "Surat"])
+        city = row1_col2.selectbox("City", ["Ahmedabad", "Vadodra", "Rajkot", "Surat"])
 
         row2_col1, row2_col2, row2_col3 = st.columns(3)
         items_count = row2_col1.number_input("Items Count", min_value=1, value=5)
@@ -29,6 +29,21 @@ with col1:
         row4_col1, row4_col2 = st.columns(2)
         rider_distance_to_rest_km = row4_col1.number_input("Rider Distance (km)", min_value=0.1, value=3.5)
         rider_avg_speed_kmph = row4_col2.number_input("Rider Speed (km/h)", min_value=1.0, value=30.0)
+        
+        
+        st.markdown("---")
+        st.markdown("#### 📡 Zomato Signal Enrichment")
+        row5_col1, row5_col2 = st.columns(2)
+        
+        total_pos_kitchen_load = row5_col1.slider("Total POS Active Tickets (Dine-in + Apps)", min_value=0, max_value=50, value=10)
+        merchant_bias_score = row5_col2.selectbox(
+            "Historical Geo-FOR Bias Score",
+            options=["Low (Trustworthy)", "Medium (Standard)", "High (Marks Early)"],
+            index=1
+        )
+        used_iot_button = st.checkbox("🛎️ Merchant used 'ZeroTap' IoT Button", value=False)
+        st.markdown("---")
+    
         
         # The submit button
         submit_button = st.form_submit_button(label="🚀 Calculate AI Dispatch Time", use_container_width=True)
@@ -49,6 +64,10 @@ with col2:
             "current_active_orders": current_active_orders,
             "rider_distance_to_rest_km": rider_distance_to_rest_km,
             "rider_avg_speed_kmph": rider_avg_speed_kmph,
+            
+            "total_pos_kitchen_load": total_pos_kitchen_load,
+            "merchant_bias_score": merchant_bias_score,
+            "used_iot_button": used_iot_button,
             
             # Hidden fields (hardcoded defaults)
             "peak_hour_flag": 1,
@@ -71,12 +90,14 @@ with col2:
                 if response.status_code == 200:
                     data = response.json()
                     
-                    # 4. Display the beautifully formatted results
+                
                     st.write(f"**Raw AI Prep Time:** {data['base_predicted_kpt_min']} min")
                     st.write(f"**Adjusted KPT:** {data['final_adjusted_kpt_min']} min")
                     
-                    rules = ", ".join(data['business_rules_applied']) if data['business_rules_applied'] else "None"
-                    st.caption(f"*Applied Rules: {rules}*")
+                
+                    if data['business_rules_applied']:
+                        rules = "\n".join([f"- {rule}" for rule in data['business_rules_applied']])
+                        st.info(f"**System Adjustments Applied:**\n{rules}")
                     
                     st.divider()
                     st.write(f"**Rider Travel Time:** {data['rider_travel_time_min']} min")
