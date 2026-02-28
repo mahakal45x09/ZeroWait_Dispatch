@@ -50,6 +50,7 @@ class OrderRequest(BaseModel):
     total_pos_kitchen_load: int
     merchant_bias_score: str
     used_iot_button: bool
+    live_weather_condition: str
 
 # 4. Create the Prediction Endpoint
 @app.post("/predict_dispatch")
@@ -67,7 +68,7 @@ def predict_dispatch(order: OrderRequest):
         pos_load = order_data.pop("total_pos_kitchen_load", 0)
         bias_score = order_data.pop("merchant_bias_score", "Medium (Standard)")
         iot_button = order_data.pop("used_iot_button", False)
-        
+        weather = order_data.pop("live_weather_condition", "Clear")
         # Now order_data ONLY contains features the XGBoost model expects
         df = pd.DataFrame([order_data])
         
@@ -112,6 +113,14 @@ def predict_dispatch(order: OrderRequest):
         if iot_button:
             adjusted_kpt -= 3.0
             applied_rules.append("ZeroTap IoT Button Used (-3.0m)")
+
+        # Rule F: Live Weather Buffer
+        if weather == "Light Rain":
+            adjusted_kpt += 3.0
+            applied_rules.append("Light Rain Buffer (+3.0m)")
+        elif weather == "Heavy Rain / Waterlogging":
+            adjusted_kpt += 8.0
+            applied_rules.append("Heavy Rain Emergency Buffer (+8.0m)")
             
         # Ensure KPT never drops below a realistic 5 minutes
         adjusted_kpt = max(5.0, adjusted_kpt)
