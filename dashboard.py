@@ -14,7 +14,7 @@ lottie_url = "https://assets8.lottiefiles.com/packages/lf20_xrmpegx2.json"
 lottie_animation = load_lottieurl(lottie_url)
 
 # 1. Page Configuration
-st.set_page_config(page_title="ZeroWait Dispatch", page_icon="images.jpeg", layout="wide")
+st.set_page_config(page_title="ZeroWait Dispatch", page_icon="🚀", layout="wide")
 st.title("ZeroWait Dispatch Dashboard")
 
 

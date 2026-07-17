@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    container_name: zerowait-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ZEROWAIT_LOG_LEVEL=INFO
+      - ZEROWAIT_CORS_ORIGINS=*
+    volumes:
+      - .:/app
+    restart: unless-stopped
+
+  dashboard:
+    build: .
+    container_name: zerowait-dashboard
+    command: streamlit run dashboard.py --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      - ZEROWAIT_API_URL=http://api:8000
+    depends_on:
+      - api
+    restart: unless-stopped
